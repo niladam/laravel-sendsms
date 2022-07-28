@@ -16,16 +16,9 @@ class LaravelSendsmsCommand extends Command
 
     public function handle()
     {
-        $to =
-            $this->argument("to") ?:
-            $this->ask("Please enter a destination phone number");
-        $message =
-            $this->argument("message") ?: $this->ask("Please enter a message");
-        $from =
-            $this->argument("from") ?:
-            $this->ask(
-                "Please enter a FROM phone number (optional, can be left empty)"
-            );
+        $to = $this->argument("to") ?: $this->ask("Enter a phone number");
+        $message = $this->argument("message") ?: $this->ask("Enter a message");
+        $from = $this->argument("from") ?: $this->ask("FROM (optional)");
 
         try {
             $message = SendSmsMessage::create(

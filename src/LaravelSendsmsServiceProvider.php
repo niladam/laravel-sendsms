@@ -13,10 +13,10 @@ class LaravelSendsmsServiceProvider extends ServiceProvider implements
     {
         $this->app->singleton(
             LaravelSendsms::class,
-            fn () => new LaravelSendsms(config('laravel-sendsms'))
+            fn() => new LaravelSendsms(config("laravel-sendsms"))
         );
 
-        $this->app->bind('laravel-sendsms', LaravelSendsms::class);
+        $this->app->bind("laravel-sendsms", LaravelSendsms::class);
 
         $this->app->singleton("command.sendsms", function () {
             return new LaravelSendsmsCommand();
@@ -30,13 +30,12 @@ class LaravelSendsmsServiceProvider extends ServiceProvider implements
         if ($this->app->runningInConsole()) {
             $this->publishes(
                 [
-                    __DIR__.'/../config/sendsms.php' => config_path(
-                        'laravel-sendsms.php'
+                    __DIR__ . "/../config/sendsms.php" => config_path(
+                        "laravel-sendsms.php"
                     ),
                 ],
-                'config'
+                "config"
             );
-            //            $this->commands([LaravelSendsmsCommand::class]);
         }
     }
 

@@ -102,6 +102,8 @@ return [
 
 ## Usage
 
+### Sending a message 
+
 ```php
 use Niladam\LaravelSendsms\SendSmsMessage;
 
@@ -137,6 +139,98 @@ SendSmsMessage::create(to: 0744123123, message: 'Example message here')->send();
 // Or by specifying the from.
 
 SendSmsMessage::create(to: '0744123123', message: 'Example message here', from: '0744123456')->send();
+```
+
+## Other available operations
+
+### ping (check system)
+
+```php
+use Niladam\LaravelSendsms\Facades\LaravelSendsms;
+
+LaravelSendSms::ping();
+
+// returns the following output
+[
+  "status" => 0,
+  "message" => "OK",
+]
+```
+
+### balance (check balance)
+```php
+use Niladam\LaravelSendsms\Facades\LaravelSendsms;
+
+LaravelSendSms::balance();
+
+// returns the following output
+[
+  "status" => 0,
+  "message" => "OK",
+  "details" => 49.76696,
+]
+```
+
+### price (check pricing for a number)
+```php
+use Niladam\LaravelSendsms\Facades\LaravelSendsms;
+
+LaravelSendSms::price('0744123123');
+
+// returns the following output
+[
+  "status" => 0,
+  "message" => "OK",
+  "details" => [
+    "cost" => 0.035, // this is the cost.
+    "status" => 64,
+    "reason" => "64: Routed OK",
+  ],
+]
+```
+
+### info (get user info)
+```php
+use Niladam\LaravelSendsms\Facades\LaravelSendsms;
+
+LaravelSendSms::info();
+
+// returns the following output
+[
+  "status" => 0,
+  "message" => "OK",
+  "details" => [
+    "balance" => "49.76696",
+    "name" => "Some Cool Company Name",
+    "phone_number" => "",
+    "currency_code" => "EUR",
+    "default_prefix" => "40",
+    "timezone" => "Europe/Bucharest",
+    "last_message_sent_at" => "2022-07-28 12:48:37",
+    "currency_symbol" => "€ ",
+    "affiliate" => [
+      "active" => false,
+      "id" => null,
+      "auth_ip_list" => null,
+      "max_registrations" => null,
+      "max_registrations_period" => null,
+    ],
+  ],
+]
+```
+
+### number
+```php
+use Niladam\LaravelSendsms\Facades\LaravelSendsms;
+
+LaravelSendSms::number();
+
+// returns the following output
+[
+  "status" => 0,
+  "message" => "OK",
+  "details" => "", // This should contain information related to the user's verified phone number.
+]
 ```
 
 ### Command

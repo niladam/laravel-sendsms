@@ -6,18 +6,14 @@ use Exception;
 use Illuminate\Support\Facades\Http;
 use Niladam\LaravelSendsms\Exceptions\InvalidMessageProvidedException;
 use Niladam\LaravelSendsms\Exceptions\InValidPhoneNumberProvidedException;
-use ReflectionMethod;
+use Niladam\LaravelSendsms\Exceptions\UnknownOperationException;
+use Throwable;
 
 class LaravelSendsms
 {
     protected string $username;
-
     protected string $password;
-
     protected string $url;
-
-    protected bool $performActionsImmediately = true;
-
     protected array $operations = [];
 
     public function __construct(protected array $config = [])
@@ -28,15 +24,21 @@ class LaravelSendsms
         $this->operations = $this->config["operations"];
     }
 
-    public function price(string $to = "")
+    /**
+     * @param  string  $to
+     * @return array|string
+     *
+     * @throws Throwable
+     */
+    public function price(string $to = ""): array|string
     {
+        $operationName = "price";
+
         throw_if(
             !$to,
             InValidPhoneNumberProvidedException::class,
             "No valid phone number provided."
         );
-
-        $operationName = __FUNCTION__;
 
         throw_if(
             !array_key_exists($operationName, $this->operations),
@@ -53,8 +55,10 @@ class LaravelSendsms
         return $this->call_api_action($operation, $args);
     }
 
-    public function call_api_action($method, $params): array|string
+    public function call_api_action($method, $parameters): array|string
     {
+        $params = $this->removeNumericKeysFromParameters($parameters);
+
         $url = $this->url . "?action=" . urlencode($method);
         $url .= "&username=" . urlencode($this->username);
         $url .= "&password=" . urlencode($this->password);
@@ -76,6 +80,15 @@ class LaravelSendsms
         }
 
         return $this->sendRequest($url);
+    }
+
+    public function removeNumericKeysFromParameters(array $parameters): array
+    {
+        return array_filter(
+            $parameters,
+            static fn($key) => !is_numeric($key),
+            ARRAY_FILTER_USE_KEY
+        );
     }
 
     public function sendRequest($url): array|string
@@ -106,45 +119,21 @@ class LaravelSendsms
             : [];
     }
 
-    public function dump($str)
+    public function balance()
     {
-        if ($this->$debug) {
-            dump($str);
-        }
-    }
+        $operationName = "balance";
 
-    /**
-     *   This action allows you to check the price you can expect to pay for a message to the destination in 'to'
-     *
-     * @param  string  $to  : A phone number
-     *
-     * @global string $password
-     * @global string $username
-     */
-    public function route_check_price($to)
-    {
-        $args = func_get_args();
-
-        return $this->call_api_action(
-            new ReflectionMethod(__CLASS__, __FUNCTION__),
-            $args
+        throw_if(
+            !array_key_exists($operationName, $this->operations),
+            UnknownOperationException::class,
+            "No operation called $operationName found."
         );
-    }
 
-    /**
-     *   Gets the user balance
-     *
-     * @global string $username
-     * @global string $password
-     */
-    public function user_get_balance()
-    {
-        $args = func_get_args();
+        $operation = $this->operations[$operationName];
 
-        return $this->call_api_action(
-            new ReflectionMethod(__CLASS__, __FUNCTION__),
-            $args
-        );
+        $args = func_get_args() ?: [];
+
+        return $this->call_api_action($operation, $args);
     }
 
     public function __call(string $name, array $arguments)
@@ -162,55 +151,6 @@ class LaravelSendsms
         $args = func_get_args() ?: [];
 
         return $this->call_api_action($operation, $args);
-    }
-
-    public function balance()
-    {
-        $operationName = __FUNCTION__;
-
-        throw_if(
-            !array_key_exists($operationName, $this->operations),
-            UnknownOperationException::class,
-            "No operation called $operationName found."
-        );
-
-        $operation = $this->operations[$operationName];
-
-        $args = func_get_args() ?: [];
-
-        return $this->call_api_action($operation, $args);
-    }
-
-    /**
-     *   Gets the user details
-     *
-     * @global string $username
-     * @global string $password
-     */
-    public function user_get_info()
-    {
-        $args = func_get_args();
-
-        return $this->call_api_action(
-            new ReflectionMethod(__CLASS__, __FUNCTION__),
-            $args
-        );
-    }
-
-    /**
-     *   This function returns the verified phone number for the given user
-     *
-     * @global string $username
-     * @global string $password
-     */
-    public function user_get_phone_number()
-    {
-        $args = func_get_args();
-
-        return $this->call_api_action(
-            new ReflectionMethod(__CLASS__, __FUNCTION__),
-            $args
-        );
     }
 
     public function send(string $to, string $message, ?string $from = "")
@@ -249,43 +189,5 @@ class LaravelSendsms
         }
 
         return $this->call_api_action($operation, $args);
-    }
-
-    /**
-     *   Send an SMS message
-     *
-     * @param  string  $to
-     * @param  string  $text  : The body of your message
-     * @param  string  $from  (optional): The expeditor's label
-     * @param  int  $report_mask  (optional): Delivery report request bitmask
-     * @param  string  $report_url  (optional): URL to call when delivery status changes
-     * @param  string  $charset  (optional): Character set to use
-     * @param  int  $data_coding  (optional): Data coding
-     * @param  int  $message_class  (optional): Message class
-     * @param  int  $auto_detect_encoding  (optional): Auto detect the encoding and send appropriately 1 = on, 0 = off.
-     * @param  string/boolean $short (optional): 1. "string" Add sort url at the end of message or search for key {short} in message and replace with short url when parameter contain URL
-     *                                            2. "boolean" Searches long url and replaces them with coresponding sort url when shrot parameter is "true"
-     *
-     * @global string $username
-     * @global string $password
-     */
-    public function message_send(
-        $to,
-        $text,
-        $from = null,
-        $report_mask = 19,
-        $report_url = null,
-        $charset = null,
-        $data_coding = null,
-        $message_class = -1,
-        $auto_detect_encoding = null,
-        $short = false
-    ) {
-        $args = func_get_args();
-
-        return $this->call_api_action(
-            new ReflectionMethod(__CLASS__, __FUNCTION__),
-            $args
-        );
     }
 }

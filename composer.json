@@ -1,0 +1,47 @@
+{
+    "name": "niladam/laravel-sendsms",
+    "description": "Laravel SendSMS integration",
+    "keywords": [
+        "niladam",
+        "laravel",
+        "laravel-sendsms"
+    ],
+    "homepage": "https://github.com/niladam/laravel-sendsms",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Madalin Tache",
+            "email": "madalin@madalin.eu",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^8.1",
+        "illuminate/http": "^8.0|^9.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Niladam\\LaravelSendsms\\": "src"
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true,
+            "phpstan/extension-installer": true
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Niladam\\LaravelSendsms\\LaravelSendsmsServiceProvider"
+            ],
+            "aliases": {
+                "LaravelSendsms": "Niladam\\LaravelSendsms\\Facades\\LaravelSendsms",
+                "SendSmsMessage": "Niladam\\LaravelSendsms\\SendSmsMessage\\"
+            }
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

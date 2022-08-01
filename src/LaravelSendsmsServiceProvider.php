@@ -3,21 +3,20 @@
 namespace Niladam\LaravelSendsms;
 
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Contracts\Support\DeferrableProvider;
 use Niladam\LaravelSendsms\Commands\LaravelSendsmsCommand;
 
-class LaravelSendsmsServiceProvider extends ServiceProvider implements DeferrableProvider
+class LaravelSendsmsServiceProvider extends ServiceProvider
 {
     public function register()
     {
         $this->app->singleton(
             LaravelSendsms::class,
-            fn () => new LaravelSendsms(config("laravel-sendsms"))
+            fn() => new LaravelSendsms(config("laravel-sendsms"))
         );
 
         $this->app->bind("laravel-sendsms", LaravelSendsms::class);
 
-        $this->app->singleton("command.sendsms", fn () => new LaravelSendsmsCommand());
+        $this->app->singleton("command.sendsms", fn() => new LaravelSendsmsCommand());
 
         $this->commands(["command.sendsms"]);
     }
@@ -27,22 +26,12 @@ class LaravelSendsmsServiceProvider extends ServiceProvider implements Deferrabl
         if ($this->app->runningInConsole()) {
             $this->publishes(
                 [
-                    __DIR__ . "/../config/sendsms.php" => config_path(
+                    __DIR__."/../config/sendsms.php" => config_path(
                         "laravel-sendsms.php"
                     ),
                 ],
                 "config"
             );
         }
-    }
-
-    /**
-     * Get the services provided by the provider.
-     *
-     * @return array
-     */
-    public function provides()
-    {
-        return ["command.sendsms"];
     }
 }
